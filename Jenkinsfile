@@ -1,41 +1,24 @@
-pipeline {
-    agent any
+node {
 
-    tools {
-        jdk 'jdk11'
+    stage('Checkout') {
+        echo 'Checking out code'
+        git branch: 'main',
+            url: 'https://github.com/Nagapuri-Mounika/Git-Pipeline-Demo.git'
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/Nagapuri-Mounika/Git-Pipeline-Demo.git'
-                echo 'Repository cloned successfully'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                echo 'Building application...'
-                sh 'chmod +x build.sh'
-                sh './build.sh'
-            }
-        }
-
-        stage('Archive') {
-            steps {
-                echo 'Archiving artifacts...'
-                archiveArtifacts artifacts: 'app.jar', fingerprint: true
-                archiveArtifacts artifacts: 'build.sh', fingerprint: true
-            }
-        }
+    stage('Build') {
+        echo 'Building project'
+        sh 'chmod +x build.sh'
+        sh './build.sh'
     }
 
-    post {
-        always {
-            echo 'Pipeline completed'
-            cleanWs()
-        }
+    stage('Test') {
+        echo 'Running tests'
+        sh 'java -cp src/main/java com.example.HelloDevOpsTest'
     }
-} EOF
 
+    stage('Archive') {
+        echo 'Archiving artifact'
+        archiveArtifacts artifacts: 'app.jar', fingerprint: true
+    }
+}
